@@ -36,7 +36,7 @@ def test_rowdec_even():
 
 # TODO: fix this!
 @pytest.mark.xfail(exception=IndexError)
-def test_rowdec_even():
+def test_rowdec2_even():
     X = np.array(
         [[0, 0, 0, 0],
          [2, 1, 4, 1]])

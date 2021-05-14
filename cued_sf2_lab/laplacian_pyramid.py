@@ -11,95 +11,68 @@ from .familiarisation import prep_cmap_array_plt
 from .familiarisation import plot_image
 
 
-def rowdec(X, h):
+def rowdec(X: np.ndarray, h: np.ndarray) -> np.ndarray:
     """
     Filter rows of image X with h and then decimate by a factor of 2.
 
     Parameters:
-    X (numpy.ndarray): Image matrix (Usually 256x256)
-    h (numpy.ndarray): Filter coefficients
+        X: Image matrix (Usually 256x256)
+        h: Filter coefficients
     Returns:
-    Y (numpy.ndarray): Image with filtered and decimated rows
+        Y: Image with filtered and decimated rows
 
     If len(H) is odd, each output sample is aligned with the first of
     each pair of input samples.
     If len(H) is even, each output sample is aligned with the mid point
     of each pair of input samples.
     """
-    [r, c] = X.shape
+    r, c = X.shape
     m = len(h)
-    m2 = int(np.fix((m)/2))
-    if (m % 2) > 0:
-        # Odd h: symmetrically extend indices without repeating end samples.
-        xe = np.array(list(range(m2, 0, -1)) + list(range(0, c)) +
-                      list(range(c-2, c-m2-2, -1)), dtype=int)
-        # print(xe)
+    m2 = m // 2
+    if m % 2:
+        X = np.pad(X, [(0, 0), (m2, m2)], mode='reflect')
     else:
-        # Even h: symmetrically extend with repeat of end samples.
-        xe = np.array(list(range(m2-2, -1, -1)) + list(range(0, c)) +
-                      list(range(c-1, c-m2, -1)), dtype=int)
-        # print(xe)
+        X = np.pad(X, [(0, 0), (m2-1, m2-1)], mode='symmetric')
 
-    t = np.array(range(0, c, 2), dtype=int)
-    # print(t)
-    Y = np.zeros((r, len(t)))
-    # print(Y)
+    Y = np.zeros((r, (c+1)//2))
     # Loop for each term in h.
-    # print(X)
-    for i in range(0, m):
-        # print(i) --> 0 1 2
-        #print(f'hello %d', i)
-        #print(h[i])
-        #print(X[:, xe[t+i]])
-        #print(h[i] * X[:, xe[t+i]])
-        Y = Y + h[i] * X[:, xe[t+i]]
-    # print(X)
+    for i in range(m):
+        Y = Y + h[i] * X[:, i:i+c:2]
     return Y
 
 
 # TODO: FIX this - breaks for even filters (like MATLAB function)
-def rowdec2(X, h):
+def rowdec2(X: np.ndarray, h: np.ndarray) -> np.ndarray:
     """
     Filter rows of image X with h and then decimate by a factor of 2.
 
     Parameters:
-    X (numpy.ndarray): Image matrix (Usually 256x256)
-    h (numpy.ndarray): Filter coefficients
+        X: Image matrix (Usually 256x256)
+        h: Filter coefficients
     Returns:
-    Y (numpy.ndarray): Image with filtered and decimated rows
+        Y: Image with filtered and decimated rows
 
     If len(H) is odd, each output sample is aligned with the second of
     each pair of input samples.
     If len(H) is even, each output sample is aligned with the mid point
     of each pair of input samples.
-
-
     """
-    [r, c] = X.shape
+    r, c = X.shape
     m = len(h)
-    m2 = int(np.fix((m)/2))
+    m2 = m // 2
     if (m % 2) > 0:
         # Odd h: symmetrically extend indices without repeating end samples.
         xe = np.array(list(range(m2, 0, -1)) + list(range(0, c)) +
                       list(range(c-2, c-m2-2, -1)), dtype=int)
-        # print(xe)
     else:
         # Even h: symmetrically extend with repeat of end samples.
         xe = np.array(list(range(m2-2, -1, -1)) + list(range(0, c)) +
                       list(range(c-1, c-m2, -1)), dtype=int)
-        # print(xe)
 
     t = np.array(range(1, c, 2), dtype=int)
-    # print(t)
     Y = np.zeros((r, len(t)))
-    # print(Y)
     # Loop for each term in h.
     for i in range(0, m):
-        # print(i) --> 0 1 2
-        #print(f'hello %d', i)
-        #print(h[i])
-        #print(X[:, xe[t+i]])
-        #print(h[i] * X[:, xe[t+i]])
         Y = Y + h[i] * X[:, xe[t+i]]
     return Y
 
@@ -151,42 +124,36 @@ def beside(X1, X2):
     return Y
 
 
-def rowint(X, h):
+def rowint(X: np.ndarray, h: np.ndarray) -> np.ndarray:
     """
     Interpolates the rows of image X by 2 using h.
 
     Parameters:
-    X (numpy.ndarray): Image matrix (Usually 256x256)
-    h (numpy.ndarray): Filter coefficients
+        X: Image matrix (Usually 256x256)
+        h: Filter coefficients
     Returns:
-    Y (numpy.ndarray): Image with interpolated rows
+        Y: Image with interpolated rows
 
     If len(h) is odd, each input sample is aligned with the first of
     each pair of output samples.
     If len(h) is even, each input sample is aligned with the mid point
     of each pair of output samples.
     """
-    [r, c] = X.shape
+    r, c = X.shape
     m = len(h)
-    m2 = int(np.fix((m)/2))
+    m2 = m // 2
     c2 = 2 * c
-    if (m % 2) > 0:
-        xe = np.array(list(range(m2, 0, -1)) + list(range(0, c2)) +
-                      list(range(c2-2, c2-m2-2, -1)), dtype=int)
-    else:
-        xe = np.array(list(range(m2-1, -1, -1)) + list(range(0, c2)) +
-                      list(range(c2-1, c2-m2-1, -1)), dtype=int)
-
-    t = np.array(range(0, c2), dtype=int)
 
     # Generate X2 as X interleaved with columns of zeros.
-    X2 = np.zeros((r, c2))
-    X2[:, range(0, c2, 2)] = X.copy()
+    X2 = np.zeros((r, c2), dtype=X.dtype)
+    X2[:, 0:c2:2] = X
+
+    X2 = np.pad(X2, [(0, 0), (m2, m2)], mode='reflect' if m % 2 else 'symmetric')
 
     Y = np.zeros((r, c2))
     # Loop for each term in h.
-    for i in range(0, m):
-        Y = Y + h[i] * X2[:, xe[t+i]]
+    for i in range(m):
+        Y = Y + h[i] * X2[:, i:i+c2]
     return Y
 
 
