@@ -4,6 +4,8 @@
 
 This repository contains the Python package and Jupyter Notebooks for the SF2 lab project in the Cambridge University Engineering department.
 
+***Note that the python version of this lab is experimental and only runs up to the end of section 7.***
+
 To get started, you should:
 
 * Have a recent version of python + Jupyter installed.
