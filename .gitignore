@@ -1,0 +1,12 @@
+#ignore images created
+*.png
+*.jpg
+*.pdf
+#ignore system files
+.ipynb_checkpoints
+.vscode/
+env
+dist
+build
+SF2_lab.egg-info
+__pycache__
