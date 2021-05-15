@@ -1,4 +1,5 @@
 import numpy as np
+import operator
 
 
 def dct_ii(N):
@@ -94,28 +95,19 @@ def regroup(X, N):
     """
     # if N is a 2-element list, N[0] is used for columns and N[1] for rows.
     # if a single value is given, a square matrix is assumed
-    if type(N) == int or type(N) == float:
-        N = [N, N]
+    try:
+        N_m = N_n = operator.index(N)
+    except TypeError:
+        N_m, N_n = N
 
-    [m, n] = X.shape
+    m, n = X.shape
 
-    if (m % N[0] != 0) or (n % N[1] != 0):
-        raise ValueError('regroup error: X dimensions not mutiples of N')
+    if (m % N_m != 0) or (n % N_n != 0):
+        raise ValueError('regroup error: X dimensions not multiples of N')
 
-    # regroup row and column indices
-    m_list = [a for a in range(m)]
-    n_list = [a for a in range(n)]
-    # need m/N etc as an integer
-    tm = np.reshape((np.reshape(m_list, [N[0], int(m/N[0])], order='F').T),
-                    [1, m], order='F')
-    tn = np.reshape((np.reshape(n_list, [N[1], int(n/N[1])], order='F').T),
-                    [1, n], order='F')
-
-    # create a list of indices
-    ixgrid = np.ix_(tm[0], tn[0])
-    Y = X[ixgrid]
-
-    return Y
+    X = X.reshape(m // N_m, N_m, n // N_n, N_n)  # subdivide the axes
+    X = X.transpose((1, 0, 3, 2))                # permute them
+    return X.reshape(m, n)                       # and recombine
 
 
 if __name__ == "__main__":
