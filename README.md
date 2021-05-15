@@ -25,3 +25,5 @@ This software consists of two repos, which share this README.
 If you are a student, you will only have access to the former!
 If you are a demonstrator, you should request access to the latter.
 The answers repository generates the other repository automatically.
+
+More information for demonstrators can be found in [the demonstrator readme](https://github.com/sigproc/cued_sf2_lab-answers/blob/main/README-demonstrators.md).

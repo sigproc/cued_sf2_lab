@@ -146,7 +146,7 @@ def rowint(X: np.ndarray, h: np.ndarray) -> np.ndarray:
 
     # Generate X2 as X interleaved with columns of zeros.
     X2 = np.zeros((r, c2), dtype=X.dtype)
-    X2[:, 0:c2:2] = X
+    X2[:, ::2] = X
 
     X2 = np.pad(X2, [(0, 0), (m2, m2)], mode='reflect' if m % 2 else 'symmetric')
 
