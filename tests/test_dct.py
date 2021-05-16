@@ -83,13 +83,21 @@ class TestColXFm:
 
     def test_basic(self):
         C = dct_ii(4)
-        X = np.arange(16*24).reshape(16, 24)
+        X = np.arange(8*2).reshape(8, 2)
         Y = colxfm(X, C)
         assert Y.shape == X.shape
-        # TODO: actually check the output
+        npt.assert_allclose(Y,
+            [[ 6.    ,  8.    ],
+             [-4.4609, -4.4609],
+             [-0.    , -0.    ],
+             [-0.317 , -0.317 ],
+             [22.    , 24.    ],
+             [-4.4609, -4.4609],
+             [-0.    , -0.    ],
+             [-0.317 , -0.317 ]], atol=1e-4)
 
     def test_invalid(self):
         C = dct_ii(5)
-        X = np.arange(16*24).reshape(16, 24)
+        X = np.arange(16).reshape(16, 1)
         with pytest.raises(ValueError):
-            colxfm(X, C)  # 5 is not a divisor
+            colxfm(X, C)  # 5 is not a divisor of 16
