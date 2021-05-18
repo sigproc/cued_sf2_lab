@@ -60,20 +60,15 @@ def rowdec2(X: np.ndarray, h: np.ndarray) -> np.ndarray:
     r, c = X.shape
     m = len(h)
     m2 = m // 2
-    if (m % 2) > 0:
-        # Odd h: symmetrically extend indices without repeating end samples.
-        xe = np.array(list(range(m2, 0, -1)) + list(range(0, c)) +
-                      list(range(c-2, c-m2-2, -1)), dtype=int)
+    if m % 2:
+        X = np.pad(X, [(0, 0), (m2, m2)], mode='reflect')
     else:
-        # Even h: symmetrically extend with repeat of end samples.
-        xe = np.array(list(range(m2-2, -1, -1)) + list(range(0, c)) +
-                      list(range(c-1, c-m2, -1)), dtype=int)
+        X = np.pad(X, [(0, 0), (m2-1, m2-1)], mode='symmetric')
 
-    t = np.array(range(1, c, 2), dtype=int)
-    Y = np.zeros((r, len(t)))
+    Y = np.zeros((r, c // 2))
     # Loop for each term in h.
-    for i in range(0, m):
-        Y = Y + h[i] * X[:, xe[t+i]]
+    for i in range(m):
+        Y = Y + h[i] * X[:, i+1:i+c:2]
     return Y
 
 
@@ -149,6 +144,28 @@ def rowint(X: np.ndarray, h: np.ndarray) -> np.ndarray:
     X2[:, ::2] = X
 
     X2 = np.pad(X2, [(0, 0), (m2, m2)], mode='reflect' if m % 2 else 'symmetric')
+
+    Y = np.zeros((r, c2))
+    # Loop for each term in h.
+    for i in range(m):
+        Y = Y + h[i] * X2[:, i:i+c2]
+    return Y
+
+
+def rowint2(X, h):
+    r, c = X.shape
+    m = len(h)
+    m2 = m // 2
+    c2 = 2 * c
+
+    # Generate X2 as X interleaved with columns of zeros.
+    X2 = np.zeros((r, c2), dtype=X.dtype)
+    X2[:, 1::2] = X
+
+    if m % 2:
+        X2 = np.pad(X2, [(0, 0), (m2, m2)], mode='reflect')
+    else:
+        raise NotImplementedError("It's not clear what this should do")
 
     Y = np.zeros((r, c2))
     # Loop for each term in h.

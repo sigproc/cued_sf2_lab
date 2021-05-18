@@ -11,3 +11,5 @@ def test_dwt():
          [ 9.  , 11.25,  0.  ,  0.5 ],
          [ 0.  ,  0.  ,  0.  ,  0.  ],
          [ 2.  ,  2.  ,  0.  ,  0.  ]])
+    Xr = idwt(Y)
+    npt.assert_equal(Xr, X)
