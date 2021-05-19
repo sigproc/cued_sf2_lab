@@ -6,11 +6,6 @@ import warnings
 
 from cued_sf2_lab.laplacian_pyramid import *
 
-try:
-    from cued_sf2_lab.answers.laplacian_pyramid import *
-except ImportError:
-    warnings.warn('Answer directory failed to import')
-
 
 def test_rowdec_odd():
     X = np.array(
@@ -44,13 +39,6 @@ def test_rowdec2_even():
     npt.assert_equal(Y2,
         [[0, 0],
          [8, 10]])
-
-def test_image_dec():
-    X = np.array(
-        [[0, 0, 0, 0],
-         [2, 1, 4, 1]])
-    Y = image_dec(X, [1, 2, 1])
-    npt.assert_equal(Y, [[12, 20]])
 
 # TODO: test `test_plot_laplacian_pyramid`
 
@@ -86,23 +74,7 @@ def test_rowint_even():
         [[0, 0, 0, 0],
          [6, 3, 5, 5]])
 
-def test_image_int():
-    X = np.array(
-        [[0, 0, 0, 0],
-         [2, 1, 4, 1]])
-    Y = image_dec(X, [1, 2, 1])
-    Z = image_int(Y, [1, 2, 1])
-    npt.assert_equal(Z,
-        [[192, 256, 320, 320],
-         [192, 256, 320, 320]])
-
 # TODO: write the rest of these
-
-def test_py4enc():
-    pass
-
-def test_py4dec():
-    pass
 
 def test_quant1():
     pass
