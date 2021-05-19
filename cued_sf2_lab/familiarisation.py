@@ -64,32 +64,44 @@ class PowerTwoTickLocator(matplotlib.ticker.Locator):
 
     def tick_values(self, vmin, vmax):
         nticks = max(self.axis.get_tick_space(), 2)
+        return multiples_pow2_between(vmin, vmax, nticks)
 
-        if vmax < vmin:
-            vmin, vmax = vmax, vmin
 
-        diff = vmax - vmin
-        dmant, dexp = np.frexp(diff)
+def multiples_pow2_between(vmin, vmax, n: int) -> np.ndarray:
+    """
+    Get all multiples between `vmin` and `vmax` of the largest power of 2 such
+    that there are at most `n` such multiples.
 
-        def possible_sizes():
-            step = dexp
-            min_i = np.ceil(vmin / (2 ** step))
-            max_i = np.floor(vmax / (2 ** step))
-            while min_i > max_i:
-                step -= 1
-                min_i = np.ceil(vmin / (2 ** step))
-                max_i = np.floor(vmax / (2 ** step))
+    The powers of 2 can be negative.
+
+    This is not part of the lab content, and is simply used to choose nice ticks
+    for plots.
+    """
+    if vmax < vmin:
+        vmin, vmax = vmax, vmin
+
+    diff = vmax - vmin
+    dmant, dexp = np.frexp(diff)
+
+    def possible_sizes():
+        step = dexp
+        min_i = np.ceil(vmin / (2.0 ** step))
+        max_i = np.floor(vmax / (2.0 ** step))
+        while min_i > max_i:
+            step -= 1
+            min_i = np.ceil(vmin / (2.0 ** step))
+            max_i = np.floor(vmax / (2.0 ** step))
+        yield (min_i, max_i, step)
+        while max_i - min_i + 1 <= n:
             yield (min_i, max_i, step)
-            while max_i - min_i + 1 <= nticks:
-                yield (min_i, max_i, step)
-                step -= 1
-                min_i = np.ceil(vmin / (2 ** step))
-                max_i = np.floor(vmax / (2 ** step))
+            step -= 1
+            min_i = np.ceil(vmin / (2.0 ** step))
+            max_i = np.floor(vmax / (2.0 ** step))
 
-        # find the largest possible size, and use it
-        for min_i, max_i, step in possible_sizes():
-            pass
-        return np.arange(min_i, max_i + 1)*(2**step)
+    # find the largest possible size, and use it
+    for min_i, max_i, step in possible_sizes():
+        pass
+    return np.arange(min_i, max_i + 1)*(2.0**step)
 
 
 def plot_image(X, *, ax=None, **kwargs):

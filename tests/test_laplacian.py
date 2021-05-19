@@ -74,16 +74,35 @@ def test_rowint_even():
         [[0, 0, 0, 0],
          [6, 3, 5, 5]])
 
-# TODO: write the rest of these
-
 def test_quant1():
-    pass
+    X = np.arange(-10, 11)
+    Xq = quant1(X, 2.5)
+    np.testing.assert_equal(Xq,
+        [-4, -4, -3, -3,
+         -2, -2, -2, -1, -1,
+          0, 0, 0,
+          1, 1, 2, 2, 2,
+          3, 3, 4, 4])
+    # TODO: should this return integers?
+    # assert np.issubdtype(Xq.dtype, np.integer)
 
-def test_quant2():
-    pass
+    # TODO: does this even make sense?
+    Xq = quant1(X, 0)
+    np.testing.assert_equal(Xq, X)
 
 def test_quantise():
-    pass
+    X = np.arange(-10, 11)
+    Xq = quantise(X, 2.5)
+    np.testing.assert_equal(Xq,
+        [-10.0, -10.0, -7.5, -7.5,
+         -5.0, -5.0, -5.0, -2.5, -2.5,
+         0.0, 0.0, 0.0,
+         2.5, 2.5, 5.0, 5.0, 5.0,
+         7.5, 7.5, 10.0, 10.0])
+
+    Xq = quantise(X, 0)
+    np.testing.assert_equal(Xq, X)
 
 def test_bpp():
+    # TODO: write this
     pass
