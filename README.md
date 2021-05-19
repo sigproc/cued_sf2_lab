@@ -1,10 +1,10 @@
 # Part IIA Project: SF2: Image Processing
 
-[![codecov](https://codecov.io/gh/sigproc/cued_sf2_lab/branch/main/graph/badge.svg)](https://codecov.io/gh/sigproc/cued_sf2_lab)
+[![codecov](https://codecov.io/gh/sigproc/cued_sf2_lab/branch/master/graph/badge.svg)](https://codecov.io/gh/sigproc/cued_sf2_lab)
 
 This repository contains the Python package and Jupyter Notebooks for the SF2 lab project in the Cambridge University Engineering department.
 
-***Note that the python version of this lab is experimental and only runs up to the end of section 7. Notebooks for sections 8 and 9 are provided but are incomplete. ***
+***Note that the python version of this lab is experimental and only runs up to the end of section 7. Notebooks for sections 8 and 9 are provided but are incomplete.***
 
 To get started, you should:
 
