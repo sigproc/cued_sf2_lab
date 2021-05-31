@@ -1,4 +1,6 @@
+Copyright (c) 2021 Signal Processing group contributors
 Copyright (c) 2020 Areeg Emarah
+Copyright (c) 2019 Jason Li, Karthik Suresh
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

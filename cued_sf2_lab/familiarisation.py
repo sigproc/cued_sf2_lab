@@ -9,7 +9,7 @@ import numpy as np
 from matplotlib import colors
 
 
-def load_mat_img(img, img_info, cmap_info):
+def load_mat_img(img, img_info, cmap_info={}):
     """
     Load a .mat image into python.
 

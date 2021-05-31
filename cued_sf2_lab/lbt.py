@@ -1,9 +1,10 @@
+import operator
 import numpy as np
 
 from .dct import dct_ii, dct_iv
 
 
-def pot_ii(N, s=(1+(5**0.5))/2, overlap='default'):
+def pot_ii(N, s=(1+(5**0.5))/2, overlap=None):
     """
     Generates the 1-D POT transform matrices of size N
 
@@ -31,12 +32,14 @@ def pot_ii(N, s=(1+(5**0.5))/2, overlap='default'):
     # ensure N is divisible 2 and is an integer
     if N % 2 != 0 or type(N) != int:
         raise ValueError('N must be an integer divisible by 2.')
-    if overlap == 'default':
+    if overlap is None:
         # produces an integer which survives next test
         overlap = N//2
-    # overlap must be an integer to create a matrix with it as dimensions
-    if type(overlap) != int:
-        raise ValueError('overlap must be an int.')
+    else:
+        try:
+            overlap = operator.index(overlap)
+        except TypeError as e:
+            raise TypeError('overlap must be an integer') from e
     # TODO: Ask Joan whether the lower limit is 0 or 1. She said 0 for now.
     if overlap > N/2 or overlap < 0:
         raise ValueError('overlap must satisfy 0<overlap<=N/2')
@@ -57,31 +60,27 @@ def pot_ii(N, s=(1+(5**0.5))/2, overlap='default'):
     diag_ones = [1 for i in range(overlap-1)]
     Sf = np.diag([s]+diag_ones)
     Sr = np.diag([1/s]+diag_ones)
-    # print('Sf', Sf)
-    # print('Sr', Sr)
 
     # generate forward and reverse filtering matrices
     if overlap < N/2:
         VI = np.identity((N//2)-overlap)
         VJ = np.fliplr(VI)
         VZ = np.zeros((overlap, (N//2)-overlap))
-        # create intermediate matrices to stack together
-        # for Vf
-        vf_1 = np.hstack((VJ @ C_ii.T @ Sf @ C_iv @ VJ, VZ))
-        vf_2 = np.hstack((VZ.T, VI))
-        Vf = np.vstack((vf_1, vf_2))
+        Vf = np.block([
+            [VJ @ C_ii.T @ Sf @ C_iv @ VJ, VZ],
+            [VZ.T, VI]])
         # for Vr
-        vr_1 = np.hstack((VJ @ C_ii.T @ Sr @ C_iv @ VJ, VZ))
-        vr_2 = np.hstack((VZ.T, VI))
-        Vr = np.vstack((vr_1, vr_2))
+        Vr = np.block([
+            [VJ @ C_ii.T @ Sr @ C_iv @ VJ, VZ],
+            [VZ.T, VI]])
 
     else:
         Vf = J @ C_ii.T @ Sf @ C_iv @ J
         Vr = J @ C_ii.T @ Sr @ C_iv @ J
     # create component matrices to build Pf and Pr
-    mtrx_1 = np.vstack((np.hstack((Id, J)), np.hstack((J, -Id))))
-    pf_1 = np.vstack((np.hstack((Id, Z)), np.hstack((Z, Vf))))
-    pr_1 = np.vstack((np.hstack((Id, Z)), np.hstack((Z, Vr))))
+    mtrx_1 = np.block([[Id, J], [J, -Id]])
+    pf_1 = np.block([[Id, Z], [Z, Vf]])
+    pr_1 = np.block([[Id, Z], [Z, Vr]])
 
     Pf = 0.5*(mtrx_1 @ pf_1 @ mtrx_1)
     Pr = 0.5*(mtrx_1 @ pr_1 @ mtrx_1)

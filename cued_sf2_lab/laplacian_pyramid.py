@@ -9,6 +9,7 @@ from matplotlib import colors
 from .familiarisation import load_mat_img
 from .familiarisation import prep_cmap_array_plt
 from .familiarisation import plot_image
+from .encoder import Encoder
 
 
 def rowdec(X: np.ndarray, h: np.ndarray) -> np.ndarray:
@@ -218,6 +219,20 @@ def quant2(q, step, rise1=None):
         return y
 
 
+class QuantizingEncoder(Encoder):
+    def __init__(self, step, rise1=None):
+        if rise1 is None:
+            rise1 = step/2
+        self.step = step
+        self.rise1 = rise1
+
+    def encode(self, X):
+        return quant1(X, self.step, self.rise1)
+
+    def decode(self, Y):
+        return quant2(Y, self.step, self.rise1)
+
+
 def quantise(x, step, rise1=None):
     """
     Quantise matrix x in one go with step width of step using quant1 and quant2
@@ -245,26 +260,22 @@ def bpp(x):
     The entropy represents the number of bits per element to encode x
     assuming an ideal first-order entropy code.
     """
-    minx = np.min(np.min(x))
-    maxx = np.max(np.max(x))
+    minx = np.min(x, axis=None)
+    maxx = np.max(x, axis=None)
     # Calculate histogram of x in bins defined by bins.
-    bins = list(range(int(np.floor(minx))-1, int(np.ceil(maxx)+2)))
-    if (np.ceil(maxx) - np.floor(minx)) < 2:
+    bins = list(range(int(np.floor(minx)), int(np.ceil(maxx)+1)))
+    if len(bins) < 2:
         # in this case there is no information, as all the values are identical
-        b = 0
-        return b
-    else:
-        [h, s] = np.histogram(x[:], bins)
-    # bar(s,h)
-    # figure(gcf)
+        return 0
+
+    h, s = np.histogram(x, bins)
 
     # Convert bin counts to probabilities, and remove zeros.
     p = h / np.sum(h)
-    p = p[(p > 0).ravel().nonzero()]
+    p = p[p > 0]
 
     # Calculate the entropy of the histogram using base 2 logs.
-    b = -np.sum(p * np.log(p)) / np.log(2)
-    return b
+    return -np.sum(p * np.log(p)) / np.log(2)
 
 
 if __name__ == "__main__":
