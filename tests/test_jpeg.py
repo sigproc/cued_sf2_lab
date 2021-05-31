@@ -21,11 +21,25 @@ def jpegout():
     return sio.loadmat(str(this_dir / 'jpegout.mat'))
 
 
+@pytest.fixture(scope="module")
+def jpegout_custom():
+    '''Return the lighthouse image X'''
+    return sio.loadmat(str(this_dir / 'jpegout_custom.mat'))
+
+
 def test_jpegenc(X, jpegout):
     '''Test jpegenc with the lighthouse image and qstep=17'''
     vlc, _bits, _huffval = jpegenc(X-128, 17)
     diff = vlc - jpegout['vlc'].astype(int)  # index 17548 off by one on Mac
     assert (np.array_equal(vlc, jpegout['vlc'].astype(int)) or
+    (np.where(diff != 0)[0] == np.array(17548) and diff[17548, 0] == -1))
+
+
+def test_jpegenc_custom(X, jpegout_custom):
+    '''Test jpegenc with the lighthouse image and qstep=17 and custom optimised tables'''
+    vlc, _bits, _huffval = jpegenc(X-128, 17, opthuff=True)
+    diff = vlc - jpegout_custom['vlc'].astype(int)  # index 17548 off by one on Mac
+    assert (np.array_equal(vlc, jpegout_custom['vlc'].astype(int)) or
     (np.where(diff != 0)[0] == np.array(17548) and diff[17548, 0] == -1))
 
 

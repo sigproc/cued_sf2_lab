@@ -319,7 +319,7 @@ def huffdes(huffhist):
 
     # Find no. of codes of each size: JPEG fig K.2, procedure Count_BITS
 
-    bits = np.zeros(max(16, max(codesize)))
+    bits = np.zeros(max(16, max(codesize)), dtype=int)
     for i in range(256):
         if codesize[i] > 0:
             bits[codesize[i]-1] = bits[codesize[i]-1] + 1
@@ -590,9 +590,9 @@ def jpegenc(X, qstep, N=8, M=8, opthuff=False, dcbits=8, log=True):
     t = np.arange(M)
     huffhist = np.zeros(16 ** 2)
     vlc = None
-    for r in range(0, sy[0] - M, M):
+    for r in range(0, sy[0], M):
         vlc1 = None
-        for c in range(0, sy[1] - M, M):
+        for c in range(0, sy[1], M):
             yq = Yq[np.ix_(r+t, c+t)]
             # Possibly regroup
             if M > N:
