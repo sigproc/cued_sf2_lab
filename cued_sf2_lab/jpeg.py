@@ -188,8 +188,6 @@ def huffgen(bits, huffval):
     """
     HUFFGEN Generate huffman codes
 
-    ** WARNING THIS CODE IS CURRENTLY KNOWN TO PRODUCE RESULTS DIFFERENT TO THE MATLAB ON WHICH IT IS BASED **
-
     [huffcode, ehuf] = HUFFGEN(bits, huffval) Translates the number
     of codes at each bit (in bits) and the valid values (in huffval).
 
@@ -205,9 +203,6 @@ def huffgen(bits, huffval):
         huffcode: nparray (ncodes, 1)
         ehuf: nparray (256, 2)
     """
-
-    warnings.warn("""The huffgen function produces different results to the matlab code it is based on.
-                  Use at your own risk!""")
 
     # Generate huffman size table (JPEG fig C1, p78):
     nb = bits.shape[0]
@@ -249,6 +244,8 @@ def huffdes(huffhist):
     """
     HUFFDES Design Huffman table
 
+    ** WARNING THIS CODE IS CURRENTLY KNOWN TO PRODUCE RESULTS DIFFERENT TO THE MATLAB ON WHICH IT IS BASED **
+
     [bits, huffval] = huffdes(huffhist) Generates the JPEG table
     bits and huffval from the 256-point histogram of values huffhist.
     This is based on the algorithms in the JPEG Book Appendix K.2.
@@ -257,6 +254,11 @@ def huffdes(huffhist):
         bits = (16, ) nparray
         huffval = (162, ) nparray
     """
+
+
+    warnings.warn("""The huffdes function produces different results to the matlab code it is based on.
+                  Use at your own risk!""")
+
     # Scale huffhist to sum just less than 32K, allowing for
     # the 162 ones we are about to add.
     huffhist = huffhist * (127 * 256)/np.sum(huffhist)
@@ -515,8 +517,8 @@ def jpegenc(X, qstep, N=8, M=8, opthuff=False, dcbits=8, log=True):
     '''
 
     if opthuff:
-        warnings.warn("""The opthuff argument to jpegenc calls the huffgen function. 
-                      The huffgen code produces different results to the matlab code it is based on.
+        warnings.warn("""The opthuff argument to jpegenc calls the huffdes function. 
+                      The huffdes code produces different results to the matlab code it is based on.
                       Use at your own risk!""")
 
     if M % N != 0:
