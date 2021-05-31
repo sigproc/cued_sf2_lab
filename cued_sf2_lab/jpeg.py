@@ -244,8 +244,6 @@ def huffdes(huffhist):
     """
     HUFFDES Design Huffman table
 
-    ** WARNING THIS CODE IS CURRENTLY KNOWN TO PRODUCE RESULTS DIFFERENT TO THE MATLAB ON WHICH IT IS BASED **
-
     [bits, huffval] = huffdes(huffhist) Generates the JPEG table
     bits and huffval from the 256-point histogram of values huffhist.
     This is based on the algorithms in the JPEG Book Appendix K.2.
@@ -254,10 +252,6 @@ def huffdes(huffhist):
         bits = (16, ) nparray
         huffval = (162, ) nparray
     """
-
-
-    warnings.warn("""The huffdes function produces different results to the matlab code it is based on.
-                  Use at your own risk!""")
 
     # Scale huffhist to sum just less than 32K, allowing for
     # the 162 ones we are about to add.
@@ -270,14 +264,14 @@ def huffdes(huffhist):
     # than the JPEG method of fig K.3.
     # Every 16 values made column.
     freq = np.reshape(huffhist, (16, 16), 'F')
-    freq[1:10, :] = freq[1:10, :] + 1.1
+    freq[1:11, :] = freq[1:11, :] + 1.1
     freq[0, [0, 15]] = freq[0, [0, 15]] + 1.1
 
     # Reshape to a vector and add a 257th point to reserve the FFFF codeword.
     # Also add a small negative ramp so that min() always picks the
     # larger index when 2 points have the same probability.
     freq = (np.append(freq.flatten('F'), 1) -
-            np.arange(0, 257, 1) * (10 ** -6))
+            np.arange(1, 258, 1) * (10 ** -6))
 
     codesize = np.zeros(257, dtype=int)
     others = -np.ones(257, dtype=int)
@@ -328,7 +322,7 @@ def huffdes(huffhist):
     bits = np.zeros(max(16, max(codesize)))
     for i in range(256):
         if codesize[i] > 0:
-            bits[codesize[i]] = bits[codesize[i]] + 1
+            bits[codesize[i]-1] = bits[codesize[i]-1] + 1
 
     # Code length limiting not needed since 1's added earlier to all valid
     # codes.
@@ -341,7 +335,7 @@ def huffdes(huffhist):
 
     huffval = np.array([], dtype=int)
     t = np.arange(0, 256, 1)
-    for i in range(16):
+    for i in range(1, 17):
         ii = np.where(codesize[t] == i)[0]
         huffval = np.concatenate((huffval, ii))
 
@@ -515,11 +509,6 @@ def jpegenc(X, qstep, N=8, M=8, opthuff=False, dcbits=8, log=True):
     bits and huffval are optional outputs which return the Huffman encoding
     used in compression
     '''
-
-    if opthuff:
-        warnings.warn("""The opthuff argument to jpegenc calls the huffdes function. 
-                      The huffdes code produces different results to the matlab code it is based on.
-                      Use at your own risk!""")
 
     if M % N != 0:
         raise ValueError('M must be an integer multiple of N!')

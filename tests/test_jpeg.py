@@ -43,7 +43,6 @@ def test_dwtgroup(X, jpegout):
     assert np.array_equal(test_reverse, test)
 
 
-@pytest.mark.xfail(reason="The code is wrong")
 def test_huffdes():
     # from lighthouse, but not important
     huffhist = np.array([[
