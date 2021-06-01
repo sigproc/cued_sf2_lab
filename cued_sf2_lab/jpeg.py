@@ -18,6 +18,9 @@ def diagscan(N):
     The first entry in the matrix is assumed to be the DC coefficient
     and is therefore not included in the scan
     '''
+    if N <= 1:
+        raise ValueError('Cannot generate a scan pattern for a {}x{} matrix'.format(N, N))
+
     # Copied from matlab without accounting for indexing.
     slast = N + 1
     scan = [slast]
@@ -66,7 +69,7 @@ def runampl(a):
         ra: (,3) nparray
     '''
     # Check for non integer values in a
-    if sum(abs(np.remainder(a, 1))):
+    if not np.issubdtype(a.dtype, np.integer):
         raise ValueError("Warning! RUNAMPL.M: Attempting to create" +
                          " run-amplitude from non-integer values")
     b = np.where(a != 0)[0]
@@ -75,27 +78,26 @@ def runampl(a):
         return ra
 
     # List non-zero elements as a column vector
-    c = np.reshape(a[b], (b.shape[0], 1)).astype('int')
+    c = a[b]
     # Generate JPEG size vector ca = floor(log2(abs(c)) + 1)
-    ca = np.zeros(c.shape).astype('int')
+    ca = np.zeros(c.shape, dtype=np.int)
     k = 1
     cb = np.abs(c)
     maxc = np.max(cb)
-    ka = np.array([[1]])
 
+    ka = [1]
     while k <= maxc:
-        ca = ca + (cb >= k)
+        ca += (cb >= k)
         k = k * 2
-        ka = np.concatenate((ka, np.array([[k]])))
+        ka.append(k)
+    ka = np.array(ka)
 
     cneg = np.where(c < 0)[0]
     # Changes expression for python indexing
-    c[cneg] = c[cneg] + ka[ca[cneg].flatten()] - 1
-    bcol = np.reshape(b, (len(b), 1))
+    c[cneg] = c[cneg] + ka[ca[cneg]] - 1
     # appended -1 instead of 0.
-    col1 = np.diff(np.concatenate((np.array([[-1]]), bcol)).flatten()) - 1
-    col1 = np.reshape(col1, (col1.shape[0], 1))
-    ra = np.concatenate((col1, ca, c), axis=1)
+    col1 = np.diff(np.concatenate((np.array([-1]), b))) - 1
+    ra = np.stack((col1, ca, c), axis=1)
     ra = np.concatenate((ra, np.array([[0, 0, 0]])))
     return ra
 
@@ -116,8 +118,7 @@ def huffdflt(typ):
         huffval: (162, ) nparray
     """
     if typ == 1:
-        bits = np.array([0, 2, 1, 3, 3, 2, 4, 3, 5, 5, 4, 4, 0, 0, 1, 125])
-        huffval = np.concatenate((
+        vals = [
             [],  # 1-bit
             [1, 2],  # 2-bit
             [3],  # 3-bit
@@ -134,23 +135,21 @@ def huffdflt(typ):
             [],  # 14-bit
             [130],  # 15-bit
             [9, 10,  22,  23,  24,  25,  26,  37,  38,  39,
-                40,  41,  42,  52,  53,  54,  55],  # 16-bit
-            [56, 57,  58,  67,  68,  69,  70,  71,  72,
-                73,  74,  83,  84,  85,  86,  87,  88,  89],
-            [90,  99, 100, 101, 102, 103, 104, 105, 106,
-                115, 116, 117, 118, 119, 120, 121, 122, 131],
-            [132, 133, 134, 135, 136, 137, 138, 146, 147,
-                148, 149, 150, 151, 152, 153, 154, 162, 163],
-            [164, 165, 166, 167, 168, 169, 170, 178, 179,
-                180, 181, 182, 183, 184, 185, 186, 194, 195],
-            [196, 197, 198, 199, 200, 201, 202, 210, 211,
-                212, 213, 214, 215, 216, 217, 218, 225, 226],
-            [227, 228, 229, 230, 231, 232, 233, 234, 241,
-                242, 243, 244, 245, 246, 247, 248, 249, 250]
-        )).astype('int')
+             40,  41,  42,  52,  53,  54,  55,  # 16-bit
+             56,  57,  58,  67,  68,  69,  70,  71,  72,
+             73,  74,  83,  84,  85,  86,  87,  88,  89,
+             90,  99, 100, 101, 102, 103, 104, 105, 106,
+             115, 116, 117, 118, 119, 120, 121, 122, 131,
+             132, 133, 134, 135, 136, 137, 138, 146, 147,
+             148, 149, 150, 151, 152, 153, 154, 162, 163,
+             164, 165, 166, 167, 168, 169, 170, 178, 179,
+             180, 181, 182, 183, 184, 185, 186, 194, 195,
+             196, 197, 198, 199, 200, 201, 202, 210, 211,
+             212, 213, 214, 215, 216, 217, 218, 225, 226,
+             227, 228, 229, 230, 231, 232, 233, 234, 241,
+             242, 243, 244, 245, 246, 247, 248, 249, 250]]
     else:
-        bits = np.array([0, 2, 1, 2, 4, 4, 3, 4, 7, 5, 4, 4, 0, 1, 2, 119])
-        huffval = np.concatenate((
+        vals = [
             [],  # 1-bit
             [0, 1],  # 2-bit
             [2],  # 3-bit
@@ -166,22 +165,26 @@ def huffdflt(typ):
             [],  # 13-bit
             [225],  # 14-bit
             [37, 241],  # 15-bit
-            [23,  24,  25,  26,  38,  39,  40,  41,  42,  53,  54],  # 16-bit
-            [55, 56,  57,  58,  67,  68,  69,  70,  71,
-                72,  73,  74,  83,  84,  85,  86,  87,  88],
-            [89,  90,  99, 100, 101, 102, 103, 104, 105,
-                106, 115, 116, 117, 118, 119, 120, 121, 122],
-            [130, 131, 132, 133, 134, 135, 136, 137, 138,
-                146, 147, 148, 149, 150, 151, 152, 153, 154],
-            [162, 163, 164, 165, 166, 167, 168, 169, 170,
-                178, 179, 180, 181, 182, 183, 184, 185, 186],
-            [194, 195, 196, 197, 198, 199, 200, 201, 202,
-                210, 211, 212, 213, 214, 215, 216, 217, 218],
-            [226,  227,  228,  229,  230,  231,  232,  233,  234,
-                242,  243,  244,  245,  246,  247,  248,  249,  250]
-        )).astype('int')
+            [23,  24,  25,  26,  38,  39,  40,  41,  42,  53,  54,  # 16-bit
+             55, 56,  57,  58,  67,  68,  69,  70,  71,
+             72,  73,  74,  83,  84,  85,  86,  87,  88,
+             89,  90,  99, 100, 101, 102, 103, 104, 105,
+             106, 115, 116, 117, 118, 119, 120, 121, 122,
+             130, 131, 132, 133, 134, 135, 136, 137, 138,
+             146, 147, 148, 149, 150, 151, 152, 153, 154,
+             162, 163, 164, 165, 166, 167, 168, 169, 170,
+             178, 179, 180, 181, 182, 183, 184, 185, 186,
+             194, 195, 196, 197, 198, 199, 200, 201, 202,
+             210, 211, 212, 213, 214, 215, 216, 217, 218,
+             226,  227,  228,  229,  230,  231,  232,  233,  234,
+             242,  243,  244,  245,  246,  247,  248,  249,  250]]
 
-    return [bits, huffval]
+    # Flatten the nested list alongside the length of each sublist, to make it
+    # clear how many bytes of data it takes to store these tables.
+    bits = np.array([len(v) for v in vals], dtype=np.uint8)
+    huffval = np.concatenate([np.array(v, dtype=np.uint8) for v in vals])
+
+    return bits, huffval
 
 
 def huffgen(bits, huffval):
@@ -200,44 +203,38 @@ def huffgen(bits, huffval):
         bits: 1D Numpy array.
         huffval: 1D Numpy array.
     Returns:
-        huffcode: nparray (ncodes, 1)
+        huffcode: nparray (ncodes,)
         ehuf: nparray (256, 2)
     """
+    ncodes = len(huffval)
+    if np.sum(bits) != ncodes:
+        raise ValueError("bits and huffvals disagree")
 
     # Generate huffman size table (JPEG fig C1, p78):
-    nb = bits.shape[0]
-    k = 1  # Max value of k is 162
-    j = 1
-    # sum on nparray sums columns.
-    ncodes = sum(bits)
-    # Check every where 1_D array of zeros/ones defined like this.
-    huffsize = np.zeros((ncodes, 1), dtype=int)
+    k = 0
+    huffsize = np.zeros(ncodes, dtype=int)
+    for i, b in enumerate(bits):
+        huffsize[k:k+b] = i + 1
+        k += b
 
-    for i in range(nb):
-        while j <= bits[i]:
-            huffsize[k - 1, 0] = i + 1
-            k += 1
-            j += 1
-        j = 1
-
-    huffcode = np.zeros((ncodes, 1), dtype=int)
+    huffcode = np.zeros(ncodes, dtype=int)
     code = 0
-    si = huffsize[0, 0]
+    si = huffsize[0]
 
     # Generate huffman code table (JPEG fig C2, p79)
     for k in range(ncodes):
-        while huffsize[k, 0] > si:
+        while huffsize[k] > si:
             code = code * 2
             si += 1
-        huffcode[k, 0] = code
+        huffcode[k] = code
         code += 1
 
     # Reorder the code tables according to the data in
     # huffval to yield the encoder look-up tables.
     ehuf = np.zeros((256, 2), dtype=int)
-    ehuf[huffval, :] = np.concatenate((huffcode, huffsize), axis=1)
+    ehuf[huffval, :] = np.stack((huffcode, huffsize), axis=1)
 
-    return [huffcode, ehuf]
+    return huffcode, ehuf
 
 
 def huffdes(huffhist):
@@ -344,7 +341,7 @@ def huffdes(huffhist):
         raise ValueError(
             'Warning! HUFFDES.M: length of huffval ~= sum(bits)')
 
-    return [bits, huffval]
+    return bits, huffval
 
 
 def huffenc(huffhist, rsa, ehuf):
@@ -368,7 +365,7 @@ def huffenc(huffhist, rsa, ehuf):
 
     r, c = rsa.shape
 
-    vlc = None
+    vlc = []
     for i in range(r):
         run = rsa[i, 0]
         # If run > 15, use repeated codes for 16 zeros.
@@ -376,26 +373,17 @@ def huffenc(huffhist, rsa, ehuf):
             # Got rid off + 1 to suit python indexing.
             code = 15 * 16
             huffhist[code] = huffhist[code] + 1
-            if vlc is None:
-                vlc = np.array([ehuf[code, :]])
-            else:
-                vlc = np.append(vlc, np.array([ehuf[code, :]]), axis=0)
+            vlc.append(ehuf[code, :])
             run = run - 16
         # Code the run and size.
         # Got rid off + 1 to suit python indexing.
         code = run * 16 + rsa[i, 1]
         huffhist[code] = huffhist[code] + 1
-        if vlc is None:
-            vlc = np.array([ehuf[code, :]])
-        else:
-            vlc = np.append(vlc, np.array([ehuf[code, :]]), axis=0)
+        vlc.append(ehuf[code, :])
         # If size > 0, add in the remainder (which is not coded).
         if rsa[i, 1] > 0:
-            if vlc is None:
-                vlc = np.array([rsa[i, [2, 1]]])
-            else:
-                vlc = np.append(vlc, np.array([rsa[i, [2, 1]]]), axis=0)
-    return vlc
+            vlc.append(rsa[i, [2, 1]])
+    return np.array(vlc)
 
 
 def dwtgroup(X, n):
@@ -538,35 +526,27 @@ def jpegenc(X, qstep, N=8, M=8, opthuff=False, dcbits=8, log=True):
     if log:
         print('Coding rows')
     sy = Yq.shape
-    t = np.arange(M)
     huffhist = np.zeros(16 ** 2)
-    vlc = None
+    vlc = []
     for r in range(0, sy[0], M):
-        vlc1 = None
         for c in range(0, sy[1], M):
-            yq = Yq[np.ix_(r+t, c+t)]
+            yq = Yq[r:r+M,c:c+M]
             # Possibly regroup
             if M > N:
                 yq = regroup(yq, N)
             yqflat = yq.flatten('F')
             # Encode DC coefficient first
-            yqflat[0] += 2 ** (dcbits-1)
-            if yqflat[0] < 0 or yqflat[0] > (2**dcbits) - 1:
+            dccoef = yqflat[0] + 2 ** (dcbits-1)
+            if dccoef not in range(2**dcbits):
                 raise ValueError(
                     'DC coefficients too large for desired number of bits')
-            dccoef = np.array([[yqflat[0], dcbits]])
+            vlc.append(np.array([[dccoef, dcbits]]))
             # Encode the other AC coefficients in scan order
-            ra1 = runampl(yqflat[scan])
             # huffenc() also updates huffhist.
-            if vlc1 is None:
-                vlc1 = np.block([[dccoef], [huffenc(huffhist, ra1, ehuf)]])
-            else:
-                vlc1 = np.block(
-                    [[vlc1], [dccoef], [huffenc(huffhist, ra1, ehuf)]])
-        if vlc is None:
-            vlc = vlc1
-        else:
-            vlc = np.block([[vlc], [vlc1]])
+            ra1 = runampl(yqflat[scan])
+            vlc.append(huffenc(huffhist, ra1, ehuf))
+    # (0, 2) array makes this work even if `vlc == []`
+    vlc = np.concatenate([np.zeros((0, 2), dtype=np.intp)] + vlc)
 
     # Return here if the default tables are sufficient, otherwise repeat the
     # encoding process using the custom designed huffman tables.
@@ -575,7 +555,7 @@ def jpegenc(X, qstep, N=8, M=8, opthuff=False, dcbits=8, log=True):
         huffval = dhuffval
         if log:
             print('Bits for coded image = {}'.format(sum(vlc[:, 1])))
-        return vlc.astype('int'), bits, huffval
+        return vlc, bits, huffval
 
     # Design custom huffman tables.
     if log:
@@ -587,32 +567,24 @@ def jpegenc(X, qstep, N=8, M=8, opthuff=False, dcbits=8, log=True):
     # Also generate a histogram of code symbols.
     if log:
         print('Coding rows (second pass)')
-    t = np.arange(M)
     huffhist = np.zeros(16 ** 2)
-    vlc = None
+    vlc = []
     for r in range(0, sy[0], M):
-        vlc1 = None
         for c in range(0, sy[1], M):
-            yq = Yq[np.ix_(r+t, c+t)]
+            yq = Yq[r:r+M, c:c+M]
             # Possibly regroup
             if M > N:
                 yq = regroup(yq, N)
             yqflat = yq.flatten('F')
             # Encode DC coefficient first
-            yqflat[0] += 2 ** (dcbits-1)
-            dccoef = np.block([yqflat[0], dcbits])
+            dccoef = yqflat[0] + 2 ** (dcbits-1)
+            vlc.append(np.array([[dccoef, dcbits]]))
             # Encode the other AC coefficients in scan order
-            ra1 = runampl(yqflat[scan])
             # huffenc() also updates huffhist.
-            if vlc1 is None:
-                vlc1 = np.block([[dccoef], [huffenc(huffhist, ra1, ehuf)]])
-            else:
-                vlc1 = np.block(
-                    [[vlc1], [dccoef], [huffenc(huffhist, ra1, ehuf)]])
-        if vlc is None:
-            vlc = vlc1
-        else:
-            vlc = np.block([[vlc], [vlc1]])
+            ra1 = runampl(yqflat[scan])
+            vlc.append(huffenc(huffhist, ra1, ehuf))
+    # (0, 2) array makes this work even if `vlc == []`
+    vlc = np.concatenate([np.zeros((0, 2), dtype=np.intp)] + vlc)
 
     if log:
         print('Bits for coded image = {}'.format(sum(vlc[:, 1])))
@@ -671,7 +643,7 @@ def jpegdec(vlc, qstep, N=8, M=8, bits=None, huffval=None, dcbits=8, W=256, H=25
     huffcode, ehuf = huffgen(bits, huffval)
 
     # Define array of powers of 2 from 1 to 2^16.
-    k = np.array([2 ** i for i in range(17)])
+    k = 2 ** np.arange(17)
 
     # For each block in the image:
 
@@ -685,7 +657,6 @@ def jpegdec(vlc, qstep, N=8, M=8, bits=None, huffval=None, dcbits=8, W=256, H=25
     run16 = ehuf[15 * 16, :]
     i = 0
     Zq = np.zeros((H, W))
-    t = np.arange(M)
 
     if log:
         print('Decoding rows')
@@ -712,7 +683,7 @@ def jpegdec(vlc, qstep, N=8, M=8, bits=None, huffval=None, dcbits=8, W=256, H=25
 
                 # Decode run and size (in bits) of AC coef.
                 start = huffstart[vlc[i, 1] - 1]
-                res = huffval[start + vlc[i, 0] - huffcode[start, 0]]
+                res = huffval[start + vlc[i, 0] - huffcode[start]]
                 run += res // 16
                 cf += run + 1
                 si = res % 16
@@ -738,7 +709,7 @@ def jpegdec(vlc, qstep, N=8, M=8, bits=None, huffval=None, dcbits=8, W=256, H=25
             # Possibly regroup yq
             if M > N:
                 yq = regroup(yq, M//N)
-            Zq[np.ix_(r+t, c+t)] = yq
+            Zq[r:r+M, c:c+M] = yq
 
     if log:
         print('Inverse quantising to step size of {}'.format(qstep))

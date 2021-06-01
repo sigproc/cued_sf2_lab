@@ -107,12 +107,12 @@ def test_huffdes():
 
 class TestDiagscan:
 
-    @pytest.mark.xfail(exception=ZeroDivisionError)
-    def test_0():
+    @pytest.mark.xfail(exception=ValueError)
+    def test_0(self):
         assert diagscan(0).shape == (0,)
 
-    @pytest.mark.skip(reason="infinite loop")
-    def test_1():
+    @pytest.mark.xfail(exception=ValueError)
+    def test_1(self):
         assert diagscan(1).shape == (0,)
 
     def test_small(self):
@@ -131,3 +131,55 @@ class TestDiagscan:
             [ 0,  3,  7,  9],
             [ 4,  6, 10, 13],
             [ 5, 11, 12, 14]])
+
+
+class TestRunampl:
+
+    def test_no_zeros(self):
+        ret = runampl(np.array([1, 2, 3, 4, 5]))
+        np.testing.assert_equal(ret,
+            [[0, 1, 1],
+             [0, 2, 2],
+             [0, 2, 3],
+             [0, 3, 4],
+             [0, 3, 5],
+             [0, 0, 0]])
+
+    def test_leading_zeros(self):
+        ret = runampl(np.array([0, 0, 1, 2, 3]))
+        np.testing.assert_equal(ret,
+            [[2, 1, 1],  # two leading zeros
+             [0, 2, 2],
+             [0, 2, 3],
+             [0, 0, 0]])
+
+    def test_trailing_zeros(self):
+        ret = runampl(np.array([1, 2, 3, 0, 0]))
+        np.testing.assert_equal(ret,
+            [[0, 1, 1],
+             [0, 2, 2],
+             [0, 2, 3],
+             [0, 0, 0]])  # doesn't record the trailing zeros at all!
+
+        # Is this a bug? The encoding is lossy!
+        np.testing.assert_equal(
+            runampl(np.array([1, 2, 3, 0, 0])),
+            runampl(np.array([1, 2, 3])))
+
+    def test_all_zeros(self):
+        ret = runampl(np.array([0, 0, 0]))
+        np.testing.assert_equal(ret,
+            [[0, 0, 0]])
+
+    def test_mid_zeros(self):
+        ret = runampl(np.array([-4, -3, -2, -1, 0, 0, 1, 2, 3, 4]))
+        np.testing.assert_equal(ret,
+            [[0, 3, 3],
+             [0, 2, 0],
+             [0, 2, 1],
+             [0, 1, 0],
+             [2, 1, 1],  # two zeros
+             [0, 2, 2],
+             [0, 2, 3],
+             [0, 3, 4],
+             [0, 0, 0]])
