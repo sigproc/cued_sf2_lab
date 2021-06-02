@@ -30,6 +30,7 @@ def jpegout_custom():
 def test_jpegenc(X, jpegout):
     '''Test jpegenc with the lighthouse image and qstep=17'''
     vlc, _bits, _huffval = jpegenc(X-128, 17)
+    vlctest(vlc)
     diff = vlc - jpegout['vlc'].astype(int)  # index 17548 off by one on Mac
     assert (np.array_equal(vlc, jpegout['vlc'].astype(int)) or
     (np.where(diff != 0)[0] == np.array(17548) and diff[17548, 0] == -1))

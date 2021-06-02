@@ -3,20 +3,23 @@ With thanks to 2019 SF2 Group 7 (Jason Li - jl944@cam.ac.uk, Karthik Suresh -
 ks800@cam.ac.uk), who did the bulk of the porting from matlab to Python.
 """
 import warnings
+from typing import Tuple, Optional
+
 import numpy as np
 from .laplacian_pyramid import quant1, quant2
 from .dct import dct_ii, colxfm, regroup
+from .bitword import bitword
 
 
-def diagscan(N):
+def diagscan(N: int) -> np.ndarray:
     '''
     Generate diagonal scanning pattern
 
-    Return: scan: a diagonal scanning index for
-    an NxN matrix
+    Returns:
+        A diagonal scanning index for a flattened NxN matrix
 
-    The first entry in the matrix is assumed to be the DC coefficient
-    and is therefore not included in the scan
+        The first entry in the matrix is assumed to be the DC coefficient
+        and is therefore not included in the scan
     '''
     if N <= 1:
         raise ValueError('Cannot generate a scan pattern for a {}x{} matrix'.format(N, N))
@@ -49,29 +52,24 @@ def diagscan(N):
     return np.array(scan) - 1
 
 
-def runampl(a):
+def runampl(a: np.ndarray) -> np.ndarray:
     '''
-    RUNAMPL Create a run-amplitude encoding from input stream
-
-    [ra] = RUNAMPL(a) Converts the stream of integers in 'a' to a
-    run-amplltude encoding in 'ra'
-
-    Column 1 of ra gives the runs of zeros between each non-zero value.
-    Column 2 gives the JPEG sizes of the non-zero values (no of
-    bits excluding leading zeros).
-    Column 3 of ra gives the values of the JPEG remainder, which
-    is normally coded in offset binary.
+    Create a run-amplitude encoding from input stream of integers
 
     Parameters:
-        a: is a integer stream (array)
+        a: array of integers to encode
 
     Returns:
-        ra: (,3) nparray
+        ra: (N, 3) array
+            ``ra[:, 0]`` gives the runs of zeros between each non-zero value.
+            ``ra[:, 1]`` gives the JPEG sizes of the non-zero values (no of
+            bits excluding leading zeros).
+            ``ra[:, 2]`` gives the values of the JPEG remainder, which
+            is normally coded in offset binary.
     '''
     # Check for non integer values in a
     if not np.issubdtype(a.dtype, np.integer):
-        raise ValueError("Warning! RUNAMPL.M: Attempting to create" +
-                         " run-amplitude from non-integer values")
+        raise TypeError(f"Arguments to runampl must be integers, got {a.dtype}")
     b = np.where(a != 0)[0]
     if len(b) == 0:
         ra = np.array([[0, 0, 0]])
@@ -102,20 +100,16 @@ def runampl(a):
     return ra
 
 
-def huffdflt(typ):
+def huffdflt(typ: int) -> Tuple[np.ndarray, np.ndarray]:
     """
-    HUFFDFLT Generates default JPEG huffman table
-    [bits, huffval] = HUFFDFLT(type) Produces the luminance (type=1) or
-    chrominance (type=2) tables.
-
-    The number of values per bit level is stored in 'bits', with the
-    corresponding codes in 'huffval'.
+    Generates default JPEG huffman tables
 
     Parameters:
-        typ: Integer
+        typ: whether to produce luminance (1) or chrominance (2) tables.
+
     Returns:
-        bits: (16, ) nparray
-        huffval: (162, ) nparray
+        bits: The number of values per bit level, shape ``(16,)``.
+        huffval: The codes sorted by bit length, shape ``(162,)``.
     """
     if typ == 1:
         vals = [
@@ -187,24 +181,19 @@ def huffdflt(typ):
     return bits, huffval
 
 
-def huffgen(bits, huffval):
+def huffgen(bits: np.ndarray, huffval: np.ndarray
+        ) -> Tuple[np.ndarray, np.ndarray]:
     """
-    HUFFGEN Generate huffman codes
-
-    [huffcode, ehuf] = HUFFGEN(bits, huffval) Translates the number
-    of codes at each bit (in bits) and the valid values (in huffval).
-
-    huffcode lists the valid codes in ascending order. ehuf is a
-    two-column vector, with one entry per possible 8-bit value. The
-    first column lists the code for that value, and the second lists
-    the length in bits.
+    Generate huffman codes from a huffman table
 
     Parameters:
-        bits: 1D Numpy array.
-        huffval: 1D Numpy array.
+        bits, huffval: results from `huffdflt` or `huffdes`.
+
     Returns:
-        huffcode: nparray (ncodes,)
-        ehuf: nparray (256, 2)
+        huffcode: the valid codes in ascending order of length.
+        ehuf: a two-column vector, with one entry per possible 8-bit value. The
+            first column lists the code for that value, and the second lists
+            the length in bits.
     """
     ncodes = len(huffval)
     if np.sum(bits) != ncodes:
@@ -232,22 +221,23 @@ def huffgen(bits, huffval):
     # Reorder the code tables according to the data in
     # huffval to yield the encoder look-up tables.
     ehuf = np.zeros((256, 2), dtype=int)
-    ehuf[huffval, :] = np.stack((huffcode, huffsize), axis=1)
+    ehuf[huffval] = np.stack((huffcode, huffsize), axis=1)
 
     return huffcode, ehuf
 
 
-def huffdes(huffhist):
+def huffdes(huffhist: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     """
-    HUFFDES Design Huffman table
+    Generates a JPEGhuffman table from a 256-point histogram of values.
 
-    [bits, huffval] = huffdes(huffhist) Generates the JPEG table
-    bits and huffval from the 256-point histogram of values huffhist.
     This is based on the algorithms in the JPEG Book Appendix K.2.
 
+    Parameters:
+        huffhist: the histogram of values
+
     Returns:
-        bits = (16, ) nparray
-        huffval = (162, ) nparray
+        bits: The number of values per bit level, shape ``(16,)``.
+        huffval: The codes sorted by bit length, shape ``(162,)``.
     """
 
     # Scale huffhist to sum just less than 32K, allowing for
@@ -323,9 +313,7 @@ def huffdes(huffhist):
 
     # Code length limiting not needed since 1's added earlier to all valid
     # codes.
-    if max(codesize) > 16:
-        # This should not happen.
-        raise ValueError('Warning! HUFFDES.M: max(codesize) > 16')
+    assert max(codesize) <= 16
 
     # Sort codesize values into ascending order and generate huffval:
     # JPEG fig K.4, procedure Sort_input.
@@ -336,26 +324,24 @@ def huffdes(huffhist):
         ii = np.where(codesize[t] == i)[0]
         huffval = np.concatenate((huffval, ii))
 
-    if len(huffval) != sum(bits):
-        # This should not happen.
-        raise ValueError(
-            'Warning! HUFFDES.M: length of huffval ~= sum(bits)')
+    assert len(huffval) == sum(bits)
 
     return bits, huffval
 
 
-def huffenc(huffhist, rsa, ehuf):
+def huffenc(huffhist: np.ndarray, rsa: np.ndarray, ehuf: np.ndarray
+        ) -> np.ndarray:
     """
-    HUFFENC Convert a run-length encoded stream to huffman
-    coding.
+    Convert a run-length encoded stream to huffman coding.
 
-    [vlc] = HUFFENC(rsa) Performs Huffman encoding on the
-    run-length information in rsa, as produced by RUNAMPL.
+    Parameters:
+        rsa: run-length information as provided by `runampl`.
+        ehuf: the huffman codes and their lengths
+        huffhist: updated in-place for use in `huffgen`.
 
-    THe codewords are variable length integers in vlc(:, 0)
-    whose lengths are in vlc(:, 1). ehuf contains the huffman
-    codes and their lengths. The array huffhist is
-    updated in-place for use in HUFFGEN.
+    Returns:
+        vlc: Variable-length codewords, consisting of codewords in ``vlc[:,0]``
+            and corresponding lengths in ``vlc[:,1]``.
     """
     if max(rsa[:, 1]) > 10:
         print("Warning: Size of value in run-amplitude " +
@@ -373,24 +359,22 @@ def huffenc(huffhist, rsa, ehuf):
             # Got rid off + 1 to suit python indexing.
             code = 15 * 16
             huffhist[code] = huffhist[code] + 1
-            vlc.append(ehuf[code, :])
+            vlc.append(ehuf[code])
             run = run - 16
         # Code the run and size.
         # Got rid off + 1 to suit python indexing.
         code = run * 16 + rsa[i, 1]
         huffhist[code] = huffhist[code] + 1
-        vlc.append(ehuf[code, :])
+        vlc.append(ehuf[code])
         # If size > 0, add in the remainder (which is not coded).
         if rsa[i, 1] > 0:
             vlc.append(rsa[i, [2, 1]])
     return np.array(vlc)
 
 
-def dwtgroup(X, n):
+def dwtgroup(X: np.ndarray, n: int) -> np.ndarray:
     '''
-    dwtgroup Change ordering of elements in a matrix
-
-    Y = dwtgroup(X,n) Regroups the rows and columns of X, such that an
+    Regroups the rows and columns of ``X``, such that an
     n-level DWT image composed of separate subimages is regrouped into 2^n x
     2^n blocks of coefs from the same spatial region (like the DCT).
 
@@ -474,28 +458,29 @@ def dwtgroup(X, n):
     return Y
 
 
-def jpegenc(X, qstep, N=8, M=8, opthuff=False, dcbits=8, log=True):
+def jpegenc(X: np.ndarray, qstep: float, N: int = 8, M: int = 8,
+        opthuff: bool = False, dcbits: int = 8, log: bool = True
+        ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     '''
-    Image in X to generate the variable length bit stream in vlc.
+    Encodes the image in X to generate a variable length bit stream.
 
-    X is the input greyscale image
-    qstep is the quantisation step to use in encoding
-    N is the width of the DCT block (defaults to 8)
-    M is the width of each block to be coded (defaults to N). Must be an
-    integer multiple of N - if it is larger, individual blocks are
-    regrouped.
-    if opthuff is true (defaults to false), the Huffman table is optimised
-    based on the data in X
-    dcbits determines how many bits are used to encode the DC coefficients
-    of the DCT (defaults to 8)
+    Parameters:
+        X: the input greyscale image
+        qstep: the quantisation step to use in encoding
+        N: the width of the DCT block (defaults to 8)
+        M: the width of each block to be coded (defaults to N). Must be an
+            integer multiple of N - if it is larger, individual blocks are
+            regrouped.
+        opthuff: if true, the Huffman table is optimised based on the data in X
+        dcbits: the number of bits to use to encode the DC coefficients
+            of the DCT.
 
-    Return: vlc, bits, huffval
-
-    vlc is the variable length output code, where vlc[:,0] are the codes, and
-    vlc[:,1] the number of corresponding valid bits, so that sum(vlc[:,1])
-    gives the total number of bits in the image
-    bits and huffval are optional outputs which return the Huffman encoding
-    used in compression
+    Returns:
+        vlc: variable length output codes, where ``vlc[:,0]`` are the codes and
+            ``vlc[:,1]`` the number of corresponding valid bits, so that
+            ``sum(vlc[:,1])`` gives the total number of bits in the image
+        bits, huffval: optional outputs containing the Huffman encoding
+            used in compression when `opthuff` is ``True``.
     '''
 
     if M % N != 0:
@@ -597,26 +582,30 @@ def jpegenc(X, qstep, N=8, M=8, opthuff=False, dcbits=8, log=True):
     return vlc, bits, huffval
 
 
-def jpegdec(vlc, qstep, N=8, M=8, bits=None, huffval=None, dcbits=8, W=256, H=256, log=True):
+def jpegdec(vlc: np.ndarray, qstep: float, N: int = 8, M: int = 8,
+        bits: Optional[np.ndarray] = None, huffval: Optional[np.ndarray] = None,
+        dcbits: int = 8, W: int = 256, H: int = 256, log: bool = True
+        ) -> np.ndarray:
     '''
     Decodes a (simplified) JPEG bit stream to an image
 
-    Z = jpegdec(vlc, qstep, N, M, bits, huffval, dcbits, W, H)
-    Decodes the variable length bit stream in vlc to an image in Z.
+    Parameters:
 
-    vlc is the variable length output code from jpegenc
-    qstep is the quantisation step to use in decoding
-    N is the width of the DCT block (defaults to 8)
-    M is the width of each block to be coded (defaults to N). Must be an
-    integer multiple of N - if it is larger, individual blocks are
-    regrouped.
-    if bits and huffval are supplied, these will be used in Huffman decoding
-    of the data, otherwise default tables are used
-    dcbits determines how many bits are used to decode the DC coefficients
-    of the DCT (defaults to 8)
-    W and H determine the size of the image (defaults to 256 x 256)
+        vlc: variable length output code from jpegenc
+        qstep: quantisation step to use in decoding
+        N: width of the DCT block (defaults to 8)
+        M: width of each block to be coded (defaults to N). Must be an
+            integer multiple of N - if it is larger, individual blocks are
+            regrouped.
+        bits, huffval: if supplied, these will be used in Huffman decoding
+            of the data, otherwise default tables are used
+        dcbits: the number of bits to use to decode the DC coefficients
+            of the DCT
+        W, H: the size of the image (defaults to 256 x 256)
 
-    Z is the output greyscale image
+    Returns:
+
+        Z: the output greyscale image
     '''
 
     opthuff = (huffval is not None and bits is not None)
@@ -653,8 +642,8 @@ def jpegdec(vlc, qstep, N=8, M=8, bits=None, huffval=None, dcbits=8, W=256, H=25
     # and mark these with vector t until the next 0/0 EOB code is found.
     # Decode all the t huffman codes, and the t+1 amplitude codes.
 
-    eob = ehuf[0, :]
-    run16 = ehuf[15 * 16, :]
+    eob = ehuf[0]
+    run16 = ehuf[15 * 16]
     i = 0
     Zq = np.zeros((H, W))
 
@@ -673,11 +662,11 @@ def jpegdec(vlc, qstep, N=8, M=8, bits=None, huffval=None, dcbits=8, W=256, H=25
             i += 1
 
             # Loop for each non-zero AC coef.
-            while np.any(vlc[i, :] != eob):
+            while np.any(vlc[i] != eob):
                 run = 0
 
                 # Decode any runs of 16 zeros first.
-                while np.all(vlc[i, :] == run16):
+                while np.all(vlc[i] == run16):
                     run += 16
                     i += 1
 
@@ -722,3 +711,16 @@ def jpegdec(vlc, qstep, N=8, M=8, bits=None, huffval=None, dcbits=8, W=256, H=25
     Z = colxfm(colxfm(Zi.T, C8.T).T, C8.T)
 
     return Z
+
+
+def vlctest(vlc: np.ndarray) -> int:
+    """ Test the validity of an array of variable-length codes.
+
+    Returns the total number of bits to code the vlc data. """
+    from numpy.lib.recfunctions import (
+        structured_to_unstructured, unstructured_to_structured)
+    if not np.all(vlc[:,1] >= 0):
+        raise ValueError("Code words must be non-negative")
+    bitwords = unstructured_to_structured(vlc, dtype=bitword.dtype)
+    bitword.verify(bitwords)
+    return bitwords['bits'].sum(dtype=np.intp)
