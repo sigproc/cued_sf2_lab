@@ -14,7 +14,7 @@ To get started, you should:
 * Have a recent version of python + Jupyter installed.
   Check that `python --version` emits what you expect it to.
 * `git clone` this repository (recommended). If you do not have git installed, you can download and extract the zip from the top of the github page; but this will make it harder for you to get updated versions.
-* Open a command prompt in the folder you downloaded the code to, and run `python -m pip install -e . --user`.
+* Open a command prompt in the folder you downloaded the code to, and run `python -m pip install -e . --usert`.
   This will install various dependencies, and a `cued_sf2_lab` python package containing a collection of helper functions.
 * Open the notebooks (`ipynb` files) in the root of this repository.
 
