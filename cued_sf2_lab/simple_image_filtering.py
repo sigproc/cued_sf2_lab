@@ -1,5 +1,6 @@
-
 import numpy as np
+
+__all__ = ["halfcos", "convse"]
 
 
 def halfcos(N: int) -> np.ndarray:
@@ -15,18 +16,6 @@ def halfcos(N: int) -> np.ndarray:
     h = np.cos((np.array(range(1, N+1))/(N+1) - 0.5) * np.pi)
     h = h / sum(h)
     return h
-
-
-'''
-Use the np.convolve function in a for loop to convolve a 15-sample half-cosine
-with each row of the test image, Lighthouse.
-https://docs.scipy.org/doc/numpy-1.14.0/reference/generated/numpy.convolve.html
-
-Observe the resulting image Xf and note the increased width and the gradual
-fade to black at the edges, caused by conv assuming the signal is zero
-outside the range of the input vectors.
-'''
-
 
 
 def convse(X: np.ndarray, h: np.ndarray) -> np.ndarray:
@@ -54,4 +43,3 @@ def convse(X: np.ndarray, h: np.ndarray) -> np.ndarray:
     for i in range(m):
         Y = Y + h[i] * X[:, i:i+c]
     return Y
-

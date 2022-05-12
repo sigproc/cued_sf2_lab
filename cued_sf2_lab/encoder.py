@@ -7,9 +7,10 @@ them if you want to. One implementation is provided,
 `cued.laplacian_pyramid.QuantizationEncoder`.
 """
 
-from typing import List, Dict, Tuple
+from typing import List
 from functools import reduce
 
+__all__ = ["Encoder", "SequentialEncoder"]
 
 class Encoder:
     """ Base class for a stage in an image processing pipeline """

@@ -3,6 +3,7 @@ import numpy as np
 
 from .dct import dct_ii, dct_iv
 
+__all__ = ["pot_ii"]
 
 def pot_ii(N, s=(1+(5**0.5))/2, overlap=None):
     """
@@ -85,7 +86,3 @@ def pot_ii(N, s=(1+(5**0.5))/2, overlap=None):
     Pf = 0.5*(mtrx_1 @ pf_1 @ mtrx_1)
     Pr = 0.5*(mtrx_1 @ pr_1 @ mtrx_1)
     return Pf, Pr
-
-
-if __name__ == '__main__':
-    print(pot_ii(8))

@@ -1,7 +1,7 @@
+import numpy as np
 import numpy.testing as npt
-import pytest
 
-from cued_sf2_lab.dwt import *
+from cued_sf2_lab.dwt import dwt, idwt
 
 def test_dwt():
     X = np.arange(16).reshape(4, 4)

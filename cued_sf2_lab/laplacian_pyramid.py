@@ -1,15 +1,21 @@
 import scipy.io
-import scipy.optimize
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 import numpy as np
 
-from matplotlib import colors
-
-from .familiarisation import load_mat_img
-from .familiarisation import prep_cmap_array_plt
 from .familiarisation import plot_image
 from .encoder import Encoder
+
+__all__ = [
+    "rowdec",
+    "rowdec2",
+    "plot_laplacian_pyramid",
+    "beside",
+    "rowint",
+    "rowint2",
+    "quant1",
+    "quant2",
+    "quantise",
+    "bpp",
+]
 
 
 def rowdec(X: np.ndarray, h: np.ndarray) -> np.ndarray:
@@ -276,62 +282,3 @@ def bpp(x):
 
     # Calculate the entropy of the histogram using base 2 logs.
     return -np.sum(p * np.log(p)) / np.log(2)
-
-
-if __name__ == "__main__":
-    # testing of rowdec for dwt
-    X = np.array([[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15]])
-    h1 = np.array((-1/4,-2/4,-1/4, -1/4)) 
-    h2=np.array((-1/4, -2/4, -1/4)) 
-    #print(rowdec2(X, h1))
-    print(rowdec(X, h2))
-    '''
-    h = 0.25*np.array([1, 2, 1])
-
-    img = 'lighthouse.mat'
-    img_info = 'X'
-    cmap_info = {'map', 'map2'}
-    X_pre_zero_mean, cmaps_dict = load_mat_img(img, img_info, cmap_info)
-    X = X_pre_zero_mean - 128.0
-
-    Y0, Y1, Y2, Y3, X4 = py4enc(X, h)
-    # plot_laplacian_pyramid(Y0, [Y1, Y2, Y3, X4])
-
-    plot_image(beside(Y0, beside(Y1, beside(Y2, beside(Y3, X4)))))
-
-    Z3, Z2, Z1, Z0 = py4dec(Y0, Y1, Y2, Y3, X4, h)
-    print('Max difference between X and Z0: ', np.max(np.abs(X-Z0)))
-
-    # plot_image(beside(Z0,beside(Z1,beside(Z2,Z3))))
-    # plot_laplacian_pyramid(Z0, [Z1,Z2,Z3])
-    '''
-    """
-    X1 = image_dec(X, h)
-    step = 17
-    X_entropy_per_pixel = bpp(quantise(X,step))
-    X1_entropy_per_pixel = bpp(quantise(X1,step))
-    Y0_entropy_per_pixel = bpp(quantise(Y0,step))
-    print('X_entropy_per_pixel ', X_entropy_per_pixel)
-    print('X1_entropy_per_pixel ', X1_entropy_per_pixel)
-    print('Y0_entropy_per_pixel ', Y0_entropy_per_pixel)
-
-    X_total_entropy = X_entropy_per_pixel*np.prod(X.shape)
-    X1_total_entropy = X1_entropy_per_pixel*np.prod(X1.shape)
-    Y0_total_entropy = Y0_entropy_per_pixel*np.prod(Y0.shape)
-    print('\n')
-    print('X_total_entropy ', X_total_entropy)
-    print('X1_total_entropy ', X1_total_entropy)
-    print('Y0_total_entropy ', Y0_total_entropy)
-    print(X_total_entropy/(X1_total_entropy+Y0_total_entropy))
-    """
-    # X1 = image_dec(X, h)
-    # X2 = image_dec(X1,h)
-    # plot_laplacian_pyramid(X, [X1,X2])
-    # X1_padded = np.zeros_like(X)
-    # X1_padded[:X1.shape[0], :X1.shape[1]] = X1
-    # print(X1_padded.shape)
-    # print(X.shape)
-    # X1.resize(X.shape)
-    # plot_image(X1)
-    # plot_image(X)
-    # plot_image(np.hstack((X,X1_padded)))

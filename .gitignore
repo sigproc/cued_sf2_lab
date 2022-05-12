@@ -8,5 +8,10 @@
 env
 dist
 build
-SF2_lab.egg-info
+*.egg-info
 __pycache__
+
+*.orig
+
+.coverage
+htmlcov

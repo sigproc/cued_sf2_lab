@@ -1,6 +1,7 @@
 import numpy as np
 import operator
 
+__all__ = ["dct_ii", "dct_iv", "colxfm", "regroup"]
 
 def dct_ii(N: int) -> np.ndarray:
     """
@@ -100,56 +101,3 @@ def regroup(X, N):
     X = X.reshape(m // N_m, N_m, n // N_n, N_n)  # subdivide the axes
     X = X.transpose((1, 0, 3, 2))                # permute them
     return X.reshape(m, n)                       # and recombine
-
-
-if __name__ == "__main__":
-    import matplotlib.pyplot as plt
-
-    from .familiarisation import load_mat_img
-    from .familiarisation import prep_cmap_array_plt
-    from .familiarisation import plot_image
-
-    # code testing dct_iv
-    print(dct_iv(8))
-    # code for images
-    '''
-    N = 8
-    C8 = dct_ii(N)
-    # print(len(C8))
-    # print(C8.shape)
-    img = 'lighthouse.mat'
-    img_info = 'X'
-    cmap_info = {'map', 'map2'}
-    X, cmaps_dict = load_mat_img(img, img_info, cmap_info)
-    # print(X)
-    X = X - 128
-    # print(X)
-    # Y = colxfm(X, C8)
-    Y = colxfm(colxfm(X, C8).T, C8).T
-    # plot_image(Y)
-
-    cmap_array = cmaps_dict['map']
-    cmap_plt = prep_cmap_array_plt(cmap_array, 'map')
-    # plot_image(X, cmap_plt='gray')
-    # plot_image(Y)
-    print(regroup(Y, N)/N)
-    # plot_image(regroup(Y, N)/N, cmap_plt)
-    '''
-    # code to check produced matrices are the same
-    '''
-    X = np.array([[1,2,3,4,5,6,7,8],
-        [10,20,30,40,50,60,70,80],
-        [3,6,9,13,15,17,22,32],
-        [4,7,88,97,23,45,34,54],
-        [1,2,3,4,5,6,7,8],
-        [10,20,30,40,50,60,70,80],
-        [3,6,9,13,15,17,22,32],
-        [4,7,88,97,23,45,34,54]])
-    #print(X)
-    C4 = dct_ii(4)
-    #print(C4)
-    Y = colxfm(colxfm(X, C4).T, C4).T
-    #print(Y)
-    print(regroup(Y,4)/4)
-    #plot_image(Y)
-    '''

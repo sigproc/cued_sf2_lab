@@ -1,10 +1,14 @@
 import pytest
-from numpy.random import randint, rand
 import numpy as np
 import scipy.io as sio
 from pathlib import Path
 
-from cued_sf2_lab.jpeg import *
+from cued_sf2_lab.jpeg import (
+    diagscan, runampl,
+    huffdes,
+    dwtgroup,
+    jpegenc, jpegdec,
+    vlctest)
 
 
 this_dir = Path(__file__).parent

@@ -1,10 +1,9 @@
-import warnings
-
-import numpy.testing as npt
 import pytest
-import warnings
+import numpy as np
+import numpy.testing as npt
 
-from cued_sf2_lab.laplacian_pyramid import *
+from cued_sf2_lab.laplacian_pyramid import (
+    rowdec, rowdec2, beside, rowint, quant1, quantise)
 
 
 def test_rowdec_odd():

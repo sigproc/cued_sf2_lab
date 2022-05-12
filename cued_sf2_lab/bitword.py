@@ -18,6 +18,8 @@ import operator
 import warnings
 import functools
 
+__all__ = ["bitword"]
+
 
 class bitword(np.record):
     """ Helper numpy structured type for storing variable-width codewords.
@@ -55,7 +57,6 @@ class bitword(np.record):
                 f"{bad_inds}\n"
                 f"with values:\n"
                 f"{arr[bad_inds]}")
-
 
 
 # Adding this attribute this makes `dtype=bitword` work in a handful of places.

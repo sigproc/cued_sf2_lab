@@ -2,13 +2,25 @@
 With thanks to 2019 SF2 Group 7 (Jason Li - jl944@cam.ac.uk, Karthik Suresh -
 ks800@cam.ac.uk), who did the bulk of the porting from matlab to Python.
 """
-import warnings
 from typing import Tuple, Optional
 
 import numpy as np
 from .laplacian_pyramid import quant1, quant2
 from .dct import dct_ii, colxfm, regroup
 from .bitword import bitword
+
+__all__ = [
+    "diagscan",
+    "runampl",
+    "huffdflt",
+    "huffgen",
+    "huffdes",
+    "huffenc",
+    "dwtgroup",
+    "jpegenc",
+    "jpegdec",
+    "vlctest",
+]
 
 
 def diagscan(N: int) -> np.ndarray:
@@ -78,7 +90,7 @@ def runampl(a: np.ndarray) -> np.ndarray:
     # List non-zero elements as a column vector
     c = a[b]
     # Generate JPEG size vector ca = floor(log2(abs(c)) + 1)
-    ca = np.zeros(c.shape, dtype=np.int)
+    ca = np.zeros(c.shape, dtype=np.int64)
     k = 1
     cb = np.abs(c)
     maxc = np.max(cb)

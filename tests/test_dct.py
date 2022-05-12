@@ -1,7 +1,8 @@
+import numpy as np
 import numpy.testing as npt
 import pytest
 
-from cued_sf2_lab.dct import *
+from cued_sf2_lab.dct import dct_ii, dct_iv, regroup, colxfm
 
 class TestDctII:
 

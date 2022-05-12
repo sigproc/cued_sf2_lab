@@ -1,7 +1,7 @@
 import numpy.testing as npt
 import pytest
 
-from cued_sf2_lab.lbt import *
+from cued_sf2_lab.lbt import pot_ii
 
 
 class TestPotII:

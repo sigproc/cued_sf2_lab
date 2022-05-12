@@ -3,6 +3,8 @@ import numpy as np
 
 from .laplacian_pyramid import rowdec, rowdec2, rowint, rowint2
 
+__all__ = ["h1", "h2", "g1", "g2", "dwt", "idwt"]
+
 h1 = np.array([-1, 2, 6, 2, -1])/8
 h2 = np.array([-1, 2, -1])/4
 
@@ -45,7 +47,3 @@ def idwt(X: np.ndarray, g1: np.ndarray = g1, g2: np.ndarray = g2)-> np.ndarray:
     Y = rowint(X[:m2, :].T, g1).T + rowint2(X[m2:, :].T,g2).T;
     Y = rowint(Y[:, :n2], g1) + rowint2(Y[:, n2:], g2)
     return Y
-
-if __name__ == '__main__':
-    X = np.array([[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15]])
-    print(dwt(X))
