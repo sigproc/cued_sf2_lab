@@ -1,7 +1,7 @@
 # Part IIA Project: SF2: Image Processing
 
 [![codecov](https://codecov.io/gh/sigproc/cued_sf2_lab/branch/master/graph/badge.svg)](https://codecov.io/gh/sigproc/cued_sf2_lab)
-<!-- [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/from-referrer) -->
+[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/from-referrer)
 
 This repository contains the Python package and Jupyter Notebooks for the SF2 lab project in the Cambridge University Engineering department.
 
