@@ -5,6 +5,7 @@
 #ignore system files
 .ipynb_checkpoints
 .vscode/
+venv
 env
 dist
 build
