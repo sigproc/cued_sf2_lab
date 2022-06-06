@@ -742,7 +742,7 @@ def vlctest(vlc: np.ndarray) -> int:
     Returns the total number of bits to code the vlc data. """
     from numpy.lib.recfunctions import (
         structured_to_unstructured, unstructured_to_structured)
-    if not np.all(vlc[:,1] >= 0):
+    if not np.all(vlc[:,0] >= 0):
         raise ValueError("Code words must be non-negative")
     bitwords = unstructured_to_structured(vlc, dtype=bitword.dtype)
     bitword.verify(bitwords)
