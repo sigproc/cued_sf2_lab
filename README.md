@@ -15,22 +15,7 @@ This repository contains the Python package and Jupyter Notebooks for the SF2 la
 For this year, we recommend trying "Github codespaces", rather than running the code on your local machine.
 These can be opened after logging in to github using the "code" dropdown above, and will save you some installation pain.
 
-### Local installation
-
-* **If using the DPO computers**:
-  * It is **strongly** advisible to boot into Linux, as `git` will already be installed there.
-  * You should use the "Anaconda terminal" not the usual terminal, as this will have a more recent version of Python.
-  * If you are using Windows in the DPO:
-    * You might have file path issues unless you work on the `U:` or `Z:` drives. To use `cd` in a command prompt to change drives, first type `U:` and then `cd U:/path/to/sf2`.
-    * You might find you are unable to install things with `pip`, and that your plots don't show up correctly, due to an old version of Anaconda being used that you will not be able to update.
-* Have a recent version of python + Jupyter installed.
-  Check that `python --version` emits what you expect it to.
-* `git clone` this repository (recommended). If you do not have git installed, you can download and extract the zip from the top of the github page; but this will make it harder for you to get updated versions.
-* Open a command prompt in the folder you downloaded the code to, and run `python -m pip install -e . --user --upgrade`.
-  This will install various dependencies, and a `cued_sf2_lab` python package containing a collection of helper functions.
-  * **If this fails, make sure to speak to a demonstrator** rather than just continuing anyway; it likely means there is a bigger problem with your python system
-* Open the notebooks (`ipynb` files) in the root of this repository.
-  * **Do not "upload" the notebooks into Jupyter**, this will just make a copy and leave you with two different copies on your system!
+If you can't used codespaces for whatever reason, look at the [local installation instructions](https://github.com/sigproc/cued_sf2_lab/wiki/Local-installation-instructions).
 
 ## I need help!
 
