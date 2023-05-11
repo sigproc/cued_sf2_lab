@@ -32,24 +32,10 @@ These can be opened after logging in to github using the "code" dropdown above, 
 * Open the notebooks (`ipynb` files) in the root of this repository.
   * **Do not "upload" the notebooks into Jupyter**, this will just make a copy and leave you with two different copies on your system!
 
-## FAQ
+## I need help!
 
-1. **Why aren't my matplotlib color bar plots showing up?**  
-   Likely you are not using the latest matplotlib.
-   You can find out the version with `import matplotlib; matplotlib.__version__` inside Jupyter.
-   To update, try `pip install --upgrade --user matplotlib`.
-   
-2. **Why aren't the image plots showing up in VSCode**?
-   You may need to do the following:
-    * Have the latest (possibly even the preview) `jupyter-vscode` extension
-    * Answer "yes" to the popup that appear in the corner of your screen about downloading additional files.
-    * Restart VSCode multiple times after updating these components.
-
-3. **Why isn't `%matplotlib widget` working**?
-   This requires very recent versions of the `notebook` and `matplotlib` packages.
-   If you get an error about `ipympl` not existing, then you did not follow one of the steps above.
-   Likely, you have found yourself on a system that refuses to be updated (like the DPO computers on windows), and there is nothing you can do.
-   Switching back to `%matplotlib nbagg` _might_ help.
+Have a look at [the FAQ](https://github.com/sigproc/cued_sf2_lab/wiki/FAQ).
+If this still doesn't help, call over a demonstrator!
 
 ## Note for demonstrators
 
