@@ -1,5 +1,6 @@
 # Part IIA Project: SF2: Image Processing
 
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/sigproc/cued_sf2_lab)
 [![codecov](https://codecov.io/gh/sigproc/cued_sf2_lab/branch/master/graph/badge.svg)](https://codecov.io/gh/sigproc/cued_sf2_lab)
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/from-referrer)
 
@@ -39,9 +40,7 @@ These can be opened after logging in to github using the "code" dropdown above, 
    To update, try `pip install --upgrade --user matplotlib`.
    
 2. **Why aren't the image plots showing up in VSCode**?
-   The notebooks currently contain `%matplotlib nbagg`, which works in Jupyter but not VSCode.
-   If you replace it with `%matplotlib widget`, then you will get interactive plots that work in VSCode.
-   Note that you will need to:
+   You may need to do the following:
     * Have the latest (possibly even the preview) `jupyter-vscode` extension
     * Answer "yes" to the popup that appear in the corner of your screen about downloading additional files.
     * Restart VSCode multiple times after updating these components.
@@ -50,6 +49,7 @@ These can be opened after logging in to github using the "code" dropdown above, 
    This requires very recent versions of the `notebook` and `matplotlib` packages.
    If you get an error about `ipympl` not existing, then you did not follow one of the steps above.
    Likely, you have found yourself on a system that refuses to be updated (like the DPO computers on windows), and there is nothing you can do.
+   Switching back to `%matplotlib nbagg` _might_ help.
 
 ## Note for demonstrators
 
