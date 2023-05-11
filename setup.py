@@ -18,10 +18,10 @@ setup(
     description='IIA Engineering SF2 Lab',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    author='Areeg Emarah',
-    maintainer='Areeg Emarah',
-    maintainer_email='ae407@cam.ac.uk',
-    url='https://github.com/areeg-98/IIB_project',
+    author='SF2 Demonstrators',
+    maintainer='Eric Wieser',
+    maintainer_email='efw27@cam.ac.uk',
+    url='https://github.com/sigproc/cued_sf2_lab',
     packages=find_packages(),
     install_requires=[
         'numpy',
@@ -38,15 +38,15 @@ setup(
 
         # 'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
     ],
     project_urls={
-        # "Bug Tracker": "https://github.com/pygae/clifford/issues",
-        "Source Code": "https://github.com/areeg-98/IIB_project",
+        "Source Code": "https://github.com/sigproc/cued_sf2_lab",
     },
 
-    python_requires='>=3.5',
+    python_requires='>=3.7',
 )

@@ -7,10 +7,14 @@ This repository contains the Python package and Jupyter Notebooks for the SF2 la
 
 ***Note that the new Python version of this lab is still in development. The notebooks are not a replacement for the PDF handouts.***
 
-~~***It is likely that the notebooks will be updated midway through the course.***~~
-The Python code in `cued_sf2_lab` has been updated, and a new notebook for section 12 has been created.
+**It is possible that the notebooks will be updated midway through the course.**
 
-To get started, you should:
+## Installation
+
+For this year, we recommend trying "Github codespaces", rather than running the code on your local machine.
+These can be opened after logging in to github using the "code" dropdown above, and will save you some installation pain.
+
+### Local installation
 
 * **If using the DPO computers**:
   * It is **strongly** advisible to boot into Linux, as `git` will already be installed there.
