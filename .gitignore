@@ -15,3 +15,7 @@ __pycache__
 
 .coverage
 htmlcov
+
+# allow notebook images
+!figures/lbt.png
+!figures/pot.png

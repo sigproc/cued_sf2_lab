@@ -489,7 +489,7 @@ def dwtgroup(X: np.ndarray, n: int) -> np.ndarray:
 
 def jpegenc(X: np.ndarray, qstep: float, N: int = 8, M: int = 8,
         opthuff: bool = False, dcbits: int = 8, log: bool = True
-        ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        ) -> Tuple[np.ndarray, np.ndarray]:
     '''
     Encodes the image in X to generate a variable length bit stream.
 
